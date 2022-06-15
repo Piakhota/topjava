@@ -4,10 +4,9 @@ import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
 import ru.javawebinar.topjava.util.MealsUtil;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -18,32 +17,47 @@ public class InMemoryMealRepository implements MealRepository {
 
     {
         MealsUtil.meals.forEach(meal -> save(meal, 1));
+
+        save(new Meal(LocalDateTime.of(2021, Month.JANUARY, 15, 10, 0), "Завтрак 2-го", 800), 2);
+        save(new Meal(LocalDateTime.of(2021, Month.JANUARY, 15, 15, 0), "Обед 2-го", 700), 2);
+        save(new Meal(LocalDateTime.of(2021, Month.JANUARY, 15, 20, 0), "Ужин 2-го", 600), 2);
+
+        save(new Meal(LocalDateTime.of(2021, Month.JANUARY, 18, 10, 0), "Завтрак 3-го", 800), 3);
+        save(new Meal(LocalDateTime.of(2021, Month.JANUARY, 18, 15, 0), "Обед 3-го", 700), 3);
+        save(new Meal(LocalDateTime.of(2021, Month.JANUARY, 18, 20, 0), "Ужин 3-го", 400), 3);
     }
 
     @Override
     public Meal save(Meal meal, int userId) {
+        Map<Integer, Meal> mealMap = repository.get(userId);
+        if (mealMap == null) {
+            mealMap = new ConcurrentHashMap<>();
+            repository.put(userId, mealMap);
+        }
         if (meal.isNew()) {
             meal.setId(counter.incrementAndGet());
-            repository.get(userId).put(meal.getId(), meal);
+            mealMap.put(meal.getId(), meal);
             return meal;
         }
-        // handle case: update, but not present in storage
-        return repository.get(userId).computeIfPresent(meal.getId(), (id, oldMeal) -> meal);
+        return mealMap.computeIfPresent(meal.getId(), (id, oldMeal) -> meal);
     }
 
     @Override
     public boolean delete(int id, int userId) {
-        return repository.get(userId) != null && repository.get(userId).remove(id) != null;
+        Map<Integer, Meal> mealMap = repository.get(userId);
+        return mealMap != null && mealMap.remove(id) != null;
     }
 
     @Override
     public Meal get(int id, int userId) {
-        return repository.get(userId).get(id);
+        Map<Integer, Meal> mealMap = repository.get(userId) == null ? new ConcurrentHashMap<>() : repository.get(userId);
+        return mealMap.get(id);
     }
 
     @Override
-    public Collection<Meal> getAll(int userId) {
-        return repository.get(userId).values().stream()
+    public List<Meal> getAll(int userId) {
+        Map<Integer, Meal> mealMap = repository.get(userId) == null ? new ConcurrentHashMap<>() : repository.get(userId);
+        return mealMap.values().stream()
                 .sorted(Collections.reverseOrder(Comparator.comparing(Meal::getDateTime)))
                 .collect(Collectors.toList());
     }

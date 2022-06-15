@@ -4,7 +4,7 @@ import ru.javawebinar.topjava.model.AbstractBaseEntity;
 
 import java.time.LocalDateTime;
 
-public class MealTo extends AbstractBaseEntity {
+public class MealTo {
     private final Integer id;
 
     private final LocalDateTime dateTime;
