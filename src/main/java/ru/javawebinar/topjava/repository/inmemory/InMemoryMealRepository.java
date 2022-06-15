@@ -1,16 +1,21 @@
 package ru.javawebinar.topjava.repository.inmemory;
 
+import org.springframework.stereotype.Repository;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
+import ru.javawebinar.topjava.util.DateTimeUtil;
 import ru.javawebinar.topjava.util.MealsUtil;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.Month;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+@Repository
 public class InMemoryMealRepository implements MealRepository {
     private final Map<Integer, Map<Integer, Meal>> repository = new ConcurrentHashMap<>();
     private final AtomicInteger counter = new AtomicInteger(0);
@@ -59,6 +64,15 @@ public class InMemoryMealRepository implements MealRepository {
         Map<Integer, Meal> mealMap = repository.get(userId) == null ? new ConcurrentHashMap<>() : repository.get(userId);
         return mealMap.values().stream()
                 .sorted(Collections.reverseOrder(Comparator.comparing(Meal::getDateTime)))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Meal> getByDatesTimes(LocalDate startDate, LocalTime startTime, LocalDate endDate, LocalTime endTime, int userId) {
+        Map<Integer, Meal> mealMap = repository.get(userId) == null ? new ConcurrentHashMap<>() : repository.get(userId);
+        return mealMap.values().stream()
+                .sorted(Collections.reverseOrder(Comparator.comparing(Meal::getDateTime)))
+                .filter(meal -> DateTimeUtil.isBetweenHalfOpen(meal.getDate(), startDate, endDate) && DateTimeUtil.isBetweenHalfOpen(meal.getTime(), startTime, endTime))
                 .collect(Collectors.toList());
     }
 }

@@ -12,7 +12,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
@@ -29,16 +31,33 @@ public class MealServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
-        String id = request.getParameter("id");
+        String action = request.getParameter("action");
+        switch (action == null ? "all" : action) {
+            case "filter":
+                String startDateStr = request.getParameter("startDate");
+                LocalDate startDate = startDateStr.equals("") ? LocalDate.MIN : LocalDate.parse(startDateStr);
+                String endDateStr = request.getParameter("endDate");
+                LocalDate endDate = endDateStr.equals("") ? LocalDate.MAX : LocalDate.parse(endDateStr);
+                String startTimeStr = request.getParameter("startTime");
+                LocalTime startTime = startTimeStr.equals("") ? LocalTime.MIN : LocalTime.parse(startTimeStr);
+                String endTimeStr = request.getParameter("endTime");
+                LocalTime endTime = endTimeStr.equals("") ? LocalTime.MAX : LocalTime.parse(endTimeStr);
+                request.setAttribute("filteredMeals", repository.getByDatesTimes(startDate, startTime, endDate, endTime, SecurityUtil.authUserId()));
+                request.getRequestDispatcher("/meals.jsp").forward(request, response);
+                break;
+            case "all":
+            default:
+                String id = request.getParameter("id");
+                Meal meal = new Meal(id.isEmpty() ? null : Integer.valueOf(id),
+                        LocalDateTime.parse(request.getParameter("dateTime")),
+                        request.getParameter("description"),
+                        Integer.parseInt(request.getParameter("calories")));
 
-        Meal meal = new Meal(id.isEmpty() ? null : Integer.valueOf(id),
-                LocalDateTime.parse(request.getParameter("dateTime")),
-                request.getParameter("description"),
-                Integer.parseInt(request.getParameter("calories")));
-
-        log.info(meal.isNew() ? "Create {}" : "Update {}", meal);
-        repository.save(meal, SecurityUtil.authUserId());
-        response.sendRedirect("meals");
+                log.info(meal.isNew() ? "Create {}" : "Update {}", meal);
+                repository.save(meal, SecurityUtil.authUserId());
+                response.sendRedirect("meals");
+                break;
+        }
     }
 
     @Override

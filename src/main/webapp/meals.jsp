@@ -14,6 +14,23 @@
         .excess {
             color: red;
         }
+
+        dl {
+            background: none repeat scroll 0 0 #FAFAFA;
+            margin: 8px 0;
+            padding: 0;
+        }
+
+        dt {
+            display: inline-block;
+            width: 170px;
+        }
+
+        dd {
+            display: inline-block;
+            margin-left: 8px;
+            vertical-align: top;
+        }
     </style>
 </head>
 <body>
@@ -22,6 +39,30 @@
     <hr/>
     <h2>Meals</h2>
     <a href="meals?action=create">Add Meal</a>
+    <br><br>
+
+    <form method="post" action="meals?action=filter">
+        <dl>
+            <dt>От даты (включая)</dt>
+            <dd><input type="date" name="startDate"></dd>
+        </dl>
+        <dl>
+            <dt>До даты (исключая)</dt>
+            <dd><input type="date" name="endDate"></dd>
+        </dl>
+        <dl>
+            <dt>От времени (включая)</dt>
+            <dd><input type="time" name="startTime"></dd>
+        </dl>
+        <dl>
+            <dt>До времени (исключая)</dt>
+            <dd><input type="time" name="endTime"></dd>
+        </dl>
+        <button type="submit">Отфильтровать</button>
+        <button onclick="window.history.back()" type="button">Отменить</button>
+
+    </form>
+
     <br><br>
     <table border="1" cellpadding="8" cellspacing="0">
         <thead>
