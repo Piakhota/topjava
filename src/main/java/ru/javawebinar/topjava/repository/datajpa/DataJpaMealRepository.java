@@ -11,8 +11,6 @@ import java.util.List;
 
 @Repository
 public class DataJpaMealRepository implements MealRepository {
-    private static final Sort SORT_DATE_TIME = Sort.by(Sort.Direction.DESC, "dateTime");
-
     private final CrudMealRepository crudMealRepository;
     private final CrudUserRepository crudUserRepository;
 
@@ -26,8 +24,7 @@ public class DataJpaMealRepository implements MealRepository {
     public Meal save(Meal meal, int userId) {
         if (meal.isNew() || get(meal.id(), userId) != null) {
             meal.setUser(crudUserRepository.getReferenceById(userId));
-            crudMealRepository.save(meal);
-            return meal;
+            return crudMealRepository.save(meal);
         } else {
             return null;
         }
