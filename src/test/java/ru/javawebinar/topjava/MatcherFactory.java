@@ -3,6 +3,7 @@ package ru.javawebinar.topjava;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.ResultMatcher;
+import ru.javawebinar.topjava.to.MealTo;
 import ru.javawebinar.topjava.web.json.JsonUtil;
 
 import java.io.UnsupportedEncodingException;
@@ -62,6 +63,10 @@ public class MatcherFactory {
 
         private static String getContent(MvcResult result) throws UnsupportedEncodingException {
             return result.getResponse().getContentAsString();
+        }
+
+        public void assertMatch(List<MealTo> actual, List<MealTo> expected) {
+            assertThat(actual).usingRecursiveFieldByFieldElementComparatorIgnoringFields(fieldsToIgnore).isEqualTo(expected);
         }
     }
 }
