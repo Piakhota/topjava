@@ -5,6 +5,8 @@
 <html>
 <jsp:include page="fragments/headTag.jsp"/>
 <body>
+<script src="resources/js/topjava.common.js" defer></script>
+<script src="resources/js/topjava.meals.js" defer></script>
 <jsp:include page="fragments/bodyHeader.jsp"/>
 
 <section>
